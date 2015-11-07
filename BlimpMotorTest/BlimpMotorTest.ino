@@ -32,7 +32,7 @@ void drive(int speed)     //-250 to 250
     analogWrite(motorPin1, speed);
     analogWrite(motorPin2, 0);
   }
-  else if(speed >= 0)
+  else if(speed < 0)
   {
     analogWrite(motorPin2, speed);
     analogWrite(motorPin1, 0);
