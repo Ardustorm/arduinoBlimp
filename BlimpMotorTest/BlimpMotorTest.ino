@@ -2,8 +2,8 @@
 
 
 //Pins that are connected to the H-Bridge
-const int motorPin1 = 1;
-const int motorPin2 = 2;
+const int motorPin1 = 0;
+const int motorPin2 = 1;
 
 //Servos and their respective pins
 Servo yawServo;
@@ -14,14 +14,56 @@ const int pitchServoPin = 6;
 void setup()
 {
   yawServo.attach(yawServoPin);
+
+  pinMode(motorPin1, OUTPUT); // set up for h bridge pin connection
+  pinMode(motorPin2, OUTPUT);
 }
 
 void loop()
 {
-  // put your   main code here, to run repeatedly:
-  drive(250);
-  delay(1000);
+  if (Serial.available() > 0)
+  {
+    int ByteReceived = Serial.read(); // reads from console
+    Serial.print(ByteReceived);   // prints input back to terminal
+    Serial.print("        ");      
+    Serial.print(ByteReceived, HEX);
+    Serial.print("       ");     
+    Serial.print(char(ByteReceived));
+    
+    if(ByteReceived == '1' ) // Inputting 1 turns on fan
+    {
+      digitalWrite(motorPin1, HIGH);
+      Serial.print(" MOTOR ON ");
+    }
+    
+    if(ByteReceived == '0' ) // turns off fan
+    {
+      digitalWrite(motorPin1, LOW);
+      Serial.print(" MOTOR OFF ");
+    }
 
+    if (ByteReceived == 'c' ) // brings to center
+    {
+      Serial.print(" SERVO TURNED TO CENTER ");
+      steer(90, 0);
+    }
+
+    if (ByteReceived == 'r') // rotates rightmost
+    {
+      Serial.print(" SERVO TURNED RIGHT ");
+      steer(180, 0);
+    }
+
+    if (ByteReceived == 'l') // rotates leftmost
+    {
+      Serial.print(" SERVO TURNED LEFT ");
+      steer(0, 0);
+    }
+    
+    Serial.println();    // End the line
+
+  // END Serial Available
+  }
 }
 
 
