@@ -2,26 +2,30 @@
 
 
 //Pins that are connected to the H-Bridge
-const int motorPin1 = 0;
-const int motorPin2 = 1;
+const int motorPinL1 = 0;
+const int motorPinL2 = 1;
+const int motorPinR1 = 5;
+const int motorPinR2 = 6;
 
-//Servos and their respective pins
-Servo yawServo;
-const int yawServoPin = 5;
-Servo pitchServo;
-const int pitchServoPin = 6;
+//Servo and its respective pin
+Servo angleServo;
+const int angleServoPin = 5;
+
 
 //Speed and location variables for servos and motor
-int motorSpeed = 0;
-int yawPositon = 90;
+int motorSpeedL = 0;
+int motorSpeedR = 0;
+int anglePosition = 90;
 
 void setup()
 {
   Serial.begin(9600);
-  yawServo.attach(yawServoPin);
+  angleServo.attach(angleServoPin);
 
-  pinMode(motorPin1, OUTPUT); // set up for h bridge pin connection
-  pinMode(motorPin2, OUTPUT);
+  pinMode(motorPinL1, OUTPUT); // set up for h bridge pin connection
+  pinMode(motorPinL2, OUTPUT);
+  pinMode(motorPinR1, OUTPUT); // set up for h bridge pin connection
+  pinMode(motorPinR2, OUTPUT);
 
   Serial.println("Code Starts now");
   Serial.flush();
@@ -31,6 +35,10 @@ void loop()
 {
   //characterControl();   //Original Control scheme using letters to control motor/servo
   numberControl();
+  Serial.print("LEFT motorSpeed = "); Serial.println(motorSpeedL,DEC);
+
+  Serial.print("Right motorSpeed = "); Serial.println(motorSpeedR,DEC);
+  Serial.print("Angle Position = "); Serial.println(anglePosition,DEC);
 
 
 }
@@ -38,21 +46,22 @@ void loop()
 void numberControl()
 {
 
-  Serial. println("Enter Motor Speed (-250 to 250), then press enter:");
+  Serial. println("Enter LEFT Motor Speed (-250 to 250), then press enter:");
   while(Serial.available() == 0);   // Wait here until input buffer has a character
-  motorSpeed = Serial.parseInt();
-  Serial.print("motorSpeed = "); Serial.println(motorSpeed,DEC);
-  Serial.print("Yaw Position = "); Serial.println(yawPositon,DEC);
+  motorSpeedL = Serial.parseInt();
+  Serial. println("Enter Right Motor Speed (-250 to 250), then press enter:");
+  while(Serial.available() == 0);   // Wait here until input buffer has a character
+  motorSpeedR = Serial.parseInt();
 
   Serial. println("Enter Servo Position (0 to 180), then press enter:");
   while(Serial.available() == 0);   // Wait here until input buffer has a character
-  yawPositon = Serial.parseInt();
-  Serial.print("motorSpeed = "); Serial.println(motorSpeed,DEC);
-  Serial.print("Yaw Position = "); Serial.println(yawPositon,DEC);
+  anglePosition = Serial.parseInt();
+  Serial.print("motorSpeed left= "); Serial.println(motorSpeedL,DEC);
+  Serial.print("motorSpeed Right= "); Serial.println(motorSpeedR,DEC);
+  Serial.print("Yaw Position = "); Serial.println(anglePosition,DEC);
 
 
-  drive(motorSpeed);
-  steer(yawPositon,0);
+  drive(motorSpeedL,motorSpeedR,anglePosition);
   
 }
 void characterControl()
@@ -68,13 +77,13 @@ void characterControl()
     
     if(ByteReceived == '1' ) // Inputting 1 turns on fan
     {
-      digitalWrite(motorPin1, HIGH);
+      digitalWrite(motorPinL1, HIGH);
       Serial.print(" MOTOR ON ");
     }
     
     if(ByteReceived == '0' ) // turns off fan
     {
-      digitalWrite(motorPin1, LOW);
+      digitalWrite(motorPinL1, LOW);
       Serial.print(" MOTOR OFF ");
     }
 
@@ -102,23 +111,37 @@ void characterControl()
   }
 }
 
-void drive(int speed)     //-250 to 250
+void drive(int speedL, int speedR, int angle)     //-250 to 250 for speed, 0 to 180 for angle
 {
-  if(speed >= 0)
+  if(speedL >= 0)                     //Left motor control
   {
-    analogWrite(motorPin1, speed);
-    analogWrite(motorPin2, 0);
+    analogWrite(motorPinL1, speedL);
+    analogWrite(motorPinL2, 0);
   }
-  else if(speed < 0)
+  else if(speedL < 0)
   {
-    analogWrite(motorPin2, speed);
-    analogWrite(motorPin1, 0);
+    analogWrite(motorPinL2, speedL);
+    analogWrite(motorPinL1, 0);
   }
+  
+  if(speedR >= 0)                     //Right motor control
+  {
+    analogWrite(motorPinR1, speedR);
+    analogWrite(motorPinR2, 0);
+  }
+  else if(speedR < 0)
+  {
+    analogWrite(motorPinR2, speedR);
+    analogWrite(motorPinR1, 0);
+  }
+  angleServo.write(angle);
 }
 
+
+//This is outdated and will be removed soon: v
 void steer(int yaw, int pitch)
 {
-  yawServo.write(yaw);
-  pitchServo.write(pitch);
+//  yawServo.write(yaw);
+  //pitchServo.write(pitch);
 }
 
