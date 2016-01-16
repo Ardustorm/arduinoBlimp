@@ -9,7 +9,7 @@ const int motorPinR2 = 6;
 
 //Servo and its respective pin
 Servo angleServo;
-const int angleServoPin = 5;
+const int angleServoPin = 3;
 
 
 //Speed and location variables for servos and motor
